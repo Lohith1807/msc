@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function TopBar({ onToggleSidebar, isSidebarOpen, activeView, onSelectView }) {
-  const { user, role, logout, switchRole } = useAuth();
+  const { user, role, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -103,44 +103,6 @@ export default function TopBar({ onToggleSidebar, isSidebarOpen, activeView, onS
                 <span className={`role-badge-pill ${getRoleBadgeClass(role)}`} style={{ marginTop: '4px', display: 'inline-block' }}>
                   Role: {role}
                 </span>
-              </div>
-            </div>
-
-            <div className="menu-divider" />
-
-            <div className="role-switcher-section">
-              <p className="role-switcher-title">Switch Persona (Interactive Demo):</p>
-              <div className="role-switcher-buttons">
-                <button
-                  type="button"
-                  className={`role-switch-btn ${role === 'admin' ? 'active' : ''}`}
-                  onClick={() => {
-                    switchRole('admin');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  👑 Admin
-                </button>
-                <button
-                  type="button"
-                  className={`role-switch-btn ${role === 'psychiatrist' ? 'active' : ''}`}
-                  onClick={() => {
-                    switchRole('psychiatrist');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  🩺 Psychiatrist
-                </button>
-                <button
-                  type="button"
-                  className={`role-switch-btn ${role === 'user' ? 'active' : ''}`}
-                  onClick={() => {
-                    switchRole('user');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  👤 User
-                </button>
               </div>
             </div>
 

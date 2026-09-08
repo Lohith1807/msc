@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
 
 export default function ProfileView({ onSelectView }) {
-  const { user, role, switchRole, logout, updateUserData } = useAuth();
+  const { user, role, logout, updateUserData } = useAuth();
 
   // Profile Edit State
   const [name, setName] = useState(user?.name || '');
