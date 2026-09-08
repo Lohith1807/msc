@@ -910,7 +910,8 @@ body {
 
 /* ============ RESPONSIVENESS & FULL-SCREEN MOBILE (<901px) ============ */
 @media (max-width: 900px) {
-  html, body {
+  body:has(.auth-wrapper),
+  html:has(.auth-wrapper) {
     overflow: hidden !important;
     height: 100dvh !important;
     min-height: 100dvh !important;
@@ -919,11 +920,22 @@ body {
     padding: 0 !important;
   }
 
-  #root {
+  #root:has(.auth-wrapper) {
     height: 100dvh !important;
     min-height: 100dvh !important;
     width: 100vw !important;
     overflow: hidden !important;
+  }
+
+  /* Ensure dashboard and its modules always scroll freely */
+  body:has(.dashboard-root),
+  html:has(.dashboard-root),
+  #root:has(.dashboard-root),
+  .dashboard-root {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
   }
 
   .auth-card-desktop {
