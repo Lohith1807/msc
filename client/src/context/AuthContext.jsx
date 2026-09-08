@@ -3,39 +3,62 @@ import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
-const DEMO_ACCOUNTS = {
-  admin: {
-    id: 'demo-admin-id',
-    name: 'MindLab Administrator',
-    email: 'lohithreddy1819@gmail.com',
-    role: 'admin',
-  },
-  psychiatrist: {
-    id: 'demo-psych-id',
-    name: 'Dr. Sarah Jenkins',
-    email: 'lohithreddy18april@gmail.com',
-    role: 'psychiatrist',
-  },
-  user: {
-    id: 'demo-user-id',
-    name: 'Alex Chen',
-    email: 'lohithreddy18k@gmail.com',
-    role: 'user',
-  },
-};
+// 7-day session duration in milliseconds (7 days = 604,800,000 ms)
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+function clearStoredSession() {
+  try {
+    localStorage.removeItem('mindlab_token');
+    localStorage.removeItem('mindlab_user');
+    localStorage.removeItem('mindlab_session_start');
+    sessionStorage.removeItem('mindlab_token');
+    sessionStorage.removeItem('mindlab_user');
+    sessionStorage.removeItem('mindlab_simulated_role');
+  } catch {
+    // ignore
+  }
+}
+
+function getValidStoredSession() {
+  try {
+    const token = localStorage.getItem('mindlab_token') || sessionStorage.getItem('mindlab_token');
+    const userStr = localStorage.getItem('mindlab_user') || sessionStorage.getItem('mindlab_user');
+    const sessionCreatedAt = localStorage.getItem('mindlab_session_start');
+
+    // If no token or user, no active session
+    if (!token || !userStr) {
+      clearStoredSession();
+      return null;
+    }
+
+    // Check 7-day expiration if timestamp exists
+    if (sessionCreatedAt) {
+      const elapsed = Date.now() - Number(sessionCreatedAt);
+      if (elapsed > SEVEN_DAYS_MS || isNaN(elapsed)) {
+        // Expired (> 7 days) -> clean out
+        clearStoredSession();
+        return null;
+      }
+    }
+
+    const user = JSON.parse(userStr);
+    return { token, user, sessionCreatedAt: sessionCreatedAt ? Number(sessionCreatedAt) : Date.now() };
+  } catch {
+    clearStoredSession();
+    return null;
+  }
+}
 
 export function AuthProvider({ children }) {
+  // Never default to admin or demo accounts: start clean
   const [token, setToken] = useState(() => {
-    return sessionStorage.getItem('mindlab_token') || 'demo_token_admin';
+    const session = getValidStoredSession();
+    return session ? session.token : null;
   });
 
   const [user, setUser] = useState(() => {
-    try {
-      const stored = sessionStorage.getItem('mindlab_user');
-      return stored ? JSON.parse(stored) : DEMO_ACCOUNTS.admin;
-    } catch {
-      return DEMO_ACCOUNTS.admin;
-    }
+    const session = getValidStoredSession();
+    return session ? session.user : null;
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -44,18 +67,42 @@ export function AuthProvider({ children }) {
   // Validate existing token on mount and sync user directly from database
   useEffect(() => {
     const verifyToken = async () => {
-      const storedToken = sessionStorage.getItem('mindlab_token') || 'demo_token_admin';
+      const stored = getValidStoredSession();
+      if (!stored) {
+        setToken(null);
+        setUser(null);
+        setInitialLoading(false);
+        return;
+      }
+
+      // Check remaining time before 7-day expiration
+      const remainingTime = SEVEN_DAYS_MS - (Date.now() - stored.sessionCreatedAt);
+      if (remainingTime <= 0) {
+        clearStoredSession();
+        setToken(null);
+        setUser(null);
+        setInitialLoading(false);
+        return;
+      }
+
       try {
-        const res = await authAPI.getMe(storedToken);
+        const res = await authAPI.getMe(stored.token);
         if (res.success && res.user) {
           setUser(res.user);
+          localStorage.setItem('mindlab_user', JSON.stringify(res.user));
           sessionStorage.setItem('mindlab_user', JSON.stringify(res.user));
-          if (!sessionStorage.getItem('mindlab_token')) {
-            sessionStorage.setItem('mindlab_token', storedToken);
-          }
+        } else {
+          // Token invalid or user no longer exists
+          clearStoredSession();
+          setToken(null);
+          setUser(null);
         }
       } catch (err) {
-        console.warn('Session sync with DB:', err.message);
+        if (err.status === 401 || err.status === 403) {
+          clearStoredSession();
+          setToken(null);
+          setUser(null);
+        }
       }
       setInitialLoading(false);
     };
@@ -63,34 +110,42 @@ export function AuthProvider({ children }) {
     verifyToken();
   }, []);
 
+  // Set automatic logout timer for remaining time within 7 days
+  useEffect(() => {
+    if (!token) return;
+    const sessionStart = Number(localStorage.getItem('mindlab_session_start'));
+    if (!sessionStart) return;
+
+    const remaining = SEVEN_DAYS_MS - (Date.now() - sessionStart);
+    if (remaining <= 0) {
+      logout();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      logout();
+    }, remaining);
+
+    return () => clearTimeout(timer);
+  }, [token]);
+
   const saveAuthSession = useCallback((newToken, newUser) => {
+    const now = Date.now();
     setToken(newToken);
     setUser(newUser);
     try {
+      localStorage.setItem('mindlab_token', newToken);
+      localStorage.setItem('mindlab_user', JSON.stringify(newUser));
+      localStorage.setItem('mindlab_session_start', String(now));
       sessionStorage.setItem('mindlab_token', newToken);
       sessionStorage.setItem('mindlab_user', JSON.stringify(newUser));
       if (newUser?.role) {
         sessionStorage.setItem('mindlab_simulated_role', newUser.role);
       }
     } catch {
-      // sessionStorage unavailable
+      // storage unavailable
     }
   }, []);
-
-  const switchRole = useCallback(async (targetRole) => {
-    const fallback = DEMO_ACCOUNTS[targetRole] || DEMO_ACCOUNTS.user;
-    const token = `demo_token_${targetRole}`;
-    try {
-      const res = await authAPI.getMe(token);
-      if (res.success && res.user) {
-        saveAuthSession(token, res.user);
-        return;
-      }
-    } catch (e) {
-      // fallback
-    }
-    saveAuthSession(token, fallback);
-  }, [saveAuthSession]);
 
   const login = useCallback(async (email, password) => {
     setIsLoading(true);
@@ -117,23 +172,18 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     try {
       await authAPI.logout();
-    } catch (e) {
+    } catch {
       // ignore network errors
     }
     setToken(null);
     setUser(null);
-    try {
-      sessionStorage.removeItem('mindlab_token');
-      sessionStorage.removeItem('mindlab_user');
-      sessionStorage.removeItem('mindlab_simulated_role');
-    } catch {
-      // ignore
-    }
+    clearStoredSession();
   }, []);
 
   const updateUserData = useCallback((updatedUser) => {
     setUser(updatedUser);
     try {
+      localStorage.setItem('mindlab_user', JSON.stringify(updatedUser));
       sessionStorage.setItem('mindlab_user', JSON.stringify(updatedUser));
     } catch {
       // ignore
@@ -152,7 +202,6 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
-    switchRole,
     saveAuthSession,
     updateUserData,
   };

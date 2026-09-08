@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import WelcomeScreen from './WelcomeScreen';
 import LoginScreen from './LoginScreen';
 import SignupScreen from './SignupScreen';
@@ -11,6 +12,14 @@ export default function AuthLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { token: routeToken } = useParams();
+  const { isAuthenticated, initialLoading } = useAuth();
+
+  // If user already has an active session (< 7 days), automatically take them to their dashboard
+  useEffect(() => {
+    if (!initialLoading && isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, initialLoading, navigate]);
 
   // Determine active view based on path
   const getViewFromPath = () => {
@@ -116,6 +125,19 @@ export default function AuthLayout() {
   };
 
   const isWelcome = activeView === 'welcome';
+
+  if (initialLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', background: '#fbfaf7' }}>
+        <div className="spinner" style={{ borderTopColor: 'var(--cyan)' }} />
+      </div>
+    );
+  }
+
+  // If already authenticated, redirecting to /dashboard
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="auth-wrapper">

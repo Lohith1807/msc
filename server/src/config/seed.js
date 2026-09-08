@@ -17,7 +17,7 @@ export const seedDatabase = async () => {
     // 1. Seed Users if count is 0
     if (userCount === 0) {
       console.log('🌱 Seeding initial users...');
-      const adminPass = await User.hashPassword('Admin@123');
+      const adminPass = await User.hashPassword('HELLO123');
       const psychPass = await User.hashPassword('Psych@123');
       const userPass = await User.hashPassword('User@123');
 

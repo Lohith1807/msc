@@ -9,17 +9,32 @@ function ProtectedRoute({ children }) {
 
   if (initialLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fbfaf7' }}>
         <div className="spinner" style={{ borderTopColor: 'var(--cyan)' }} />
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/welcome" replace />;
   }
 
   return children;
+}
+
+// Starting screen redirect: Shows Welcome page at start for everyone not logged in
+function RootRedirect() {
+  const { isAuthenticated, initialLoading } = useAuth();
+
+  if (initialLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fbfaf7' }}>
+        <div className="spinner" style={{ borderTopColor: 'var(--cyan)' }} />
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/welcome" replace />;
 }
 
 export default function App() {
@@ -27,7 +42,8 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Starting at '/' shows Welcome screen for everyone unless already logged in */}
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/welcome" element={<AuthLayout />} />
           <Route path="/login" element={<AuthLayout />} />
           <Route path="/signup" element={<AuthLayout />} />
@@ -41,7 +57,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<RootRedirect />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

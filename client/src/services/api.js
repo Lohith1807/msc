@@ -6,8 +6,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Automatically attach stored token if available
-  const storedToken = sessionStorage.getItem('mindlab_token');
+  // Automatically attach stored token if available (supports 7-day persistent session)
+  const storedToken =
+    typeof localStorage !== 'undefined'
+      ? localStorage.getItem('mindlab_token') || sessionStorage.getItem('mindlab_token')
+      : null;
   const token = options.token || storedToken;
 
   // Stored role simulation header if testing
