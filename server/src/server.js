@@ -89,7 +89,7 @@ const startServer = async () => {
     await seedDatabase();
     app.listen(PORT, () => {
       console.log(`🌿 MindLab Server running on port ${PORT}`);
-      console.log(`📡 API available at: http://localhost:${PORT}/api`);
+      console.log(`📡 API available at: ${process.env.NODE_ENV === 'production' ? 'https://your-render-url.onrender.com' : `http://localhost:${PORT}`}/api`);
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);
