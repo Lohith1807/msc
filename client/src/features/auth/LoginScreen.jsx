@@ -245,44 +245,6 @@ export default function LoginScreen({
               </>
             )}
           </button>
-
-          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--blue-gray)', textTransform: 'uppercase', letterSpacing: '0.4px', textAlign: 'center' }}>
-              ⚡ Quick Fill Demo Accounts:
-            </span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
-              <button
-                type="button"
-                style={{ padding: '6px 4px', fontSize: '11px', fontWeight: '700', borderRadius: '8px', border: '1px solid var(--input-border)', background: '#f6fbfb', color: 'var(--navy)', cursor: 'pointer' }}
-                onClick={() => {
-                  setEmail('lohithreddy1819@gmail.com');
-                  setPassword('Admin@123');
-                }}
-              >
-                👑 Admin
-              </button>
-              <button
-                type="button"
-                style={{ padding: '6px 4px', fontSize: '11px', fontWeight: '700', borderRadius: '8px', border: '1px solid var(--input-border)', background: '#f6fbfb', color: 'var(--navy)', cursor: 'pointer' }}
-                onClick={() => {
-                  setEmail('lohithreddy18april@gmail.com');
-                  setPassword('Psych@123');
-                }}
-              >
-                🩺 Psychiatrist
-              </button>
-              <button
-                type="button"
-                style={{ padding: '6px 4px', fontSize: '11px', fontWeight: '700', borderRadius: '8px', border: '1px solid var(--input-border)', background: '#f6fbfb', color: 'var(--navy)', cursor: 'pointer' }}
-                onClick={() => {
-                  setEmail('lohithreddy18k@gmail.com');
-                  setPassword('User@123');
-                }}
-              >
-                👤 User
-              </button>
-            </div>
-          </div>
         </form>
 
         <div className="divider">

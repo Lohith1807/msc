@@ -908,34 +908,283 @@ body {
   background: rgba(255, 255, 255, 0.85);
 }
 
-/* ============ RESPONSIVENESS ============ */
+/* ============ RESPONSIVENESS & FULL-SCREEN MOBILE (<901px) ============ */
 @media (max-width: 900px) {
+  html, body {
+    overflow: hidden !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    background: var(--card-bg) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    width: 100vw !important;
+    overflow: hidden !important;
+  }
+
   .auth-card-desktop {
-    display: none;
+    display: none !important;
   }
-  .stage {
-    display: flex;
-    gap: 0;
-  }
-}
 
-@media (min-width: 421px) and (max-width: 900px) {
-  .phone {
-    width: 340px;
-    height: 736px;
-  }
-}
-
-@media (max-width: 420px) {
   .auth-wrapper {
-    padding: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    background: var(--card-bg) !important;
   }
+
+  .stage {
+    display: block !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
   .phone {
-    width: 100vw;
-    height: 100vh;
-    max-height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: hidden !important;
+  }
+
+  .screen-slide {
+    width: 100vw !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .screen {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  /* Welcome Screen Full-bleed Edge-to-Edge */
+  #welcome {
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: transparent !important;
+    overflow: hidden !important;
+  }
+
+  #welcome .welcome-bg {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+  }
+
+  #welcome .welcome-content {
+    padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px 0 !important;
+  }
+
+  #welcome .welcome-content .logo-full {
+    width: 170px !important;
+  }
+
+  #welcome .welcome-desc {
+    margin-top: 6px !important;
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    max-width: 290px !important;
+  }
+
+  #welcome .welcome-spacer {
+    flex: 1 !important;
+  }
+
+  #welcome .welcome-bottom {
+    padding: 0 24px calc(env(safe-area-inset-bottom, 0px) + 28px) !important;
+  }
+
+  #welcome .btn-primary {
+    height: 54px !important;
+    border-radius: 27px !important;
+    font-size: 16.5px !important;
+    max-width: 320px !important;
+  }
+
+  #welcome .mind-matters {
+    margin-top: 14px !important;
+    font-size: 13px !important;
+  }
+
+  /* Login / Auth Screens Full Bleed */
+  #login,
+  #signup,
+  #forgot-password,
+  #reset-password {
+    background: var(--card-bg) !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .back-btn {
+    position: absolute !important;
+    top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+    left: 14px !important;
+    margin: 0 !important;
+    z-index: 10 !important;
+  }
+
+  /* Login Screen: Perfectly balanced to fit 100% with NO SCROLL */
+  #login .login-content {
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 26px calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
+    height: 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    overflow-y: hidden !important; /* Disables scroll */
+  }
+
+  #login .login-content .logo-full {
+    width: 130px !important;
+    margin-top: 0 !important;
+  }
+
+  #login .welcome-back {
+    margin-top: 6px !important;
+    font-size: 23px !important;
+    line-height: 1.2 !important;
+  }
+
+  #login .login-desc {
+    margin-top: 4px !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    max-width: 290px !important;
+  }
+
+  #login .auth-form {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+
+  #login .field-wrapper {
+    margin-top: 9px !important;
+    max-width: 320px !important;
+  }
+
+  #login .field {
+    height: 48px !important;
+    border-radius: 14px !important;
+    padding: 0 16px !important;
+  }
+
+  #login .field input {
+    font-size: 14px !important;
+  }
+
+  #login .forgot-row {
+    margin-top: 5px !important;
+  }
+
+  #login .forgot-row a,
+  #login .forgot-row button {
+    font-size: 12.5px !important;
+  }
+
+  #login .btn-primary {
+    height: 48px !important;
+    border-radius: 24px !important;
+    margin-top: 10px !important;
+    font-size: 15.5px !important;
+    max-width: 320px !important;
+  }
+
+  #login .divider {
+    margin-top: 10px !important;
+    max-width: 320px !important;
+  }
+
+  #login .btn-secondary {
+    height: 46px !important;
+    border-radius: 23px !important;
+    margin-top: 10px !important;
+    font-size: 14.5px !important;
+    max-width: 320px !important;
+  }
+
+  #login .bottom-msg {
+    margin-top: 8px !important;
+    margin-bottom: 2px !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* Other auth screens (signup, forgot, reset) allow clean hidden-scrollbar scroll if needed */
+  #signup .login-content,
+  #forgot-password .login-content,
+  #reset-password .login-content {
+    padding: calc(env(safe-area-inset-top, 0px) + 16px) 24px calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    height: 100% !important;
+  }
+
+  #signup .login-content .logo-full,
+  #forgot-password .login-content .logo-full,
+  #reset-password .login-content .logo-full {
+    width: 130px !important;
+  }
+
+  #signup .welcome-back,
+  #forgot-password .welcome-back,
+  #reset-password .welcome-back {
+    margin-top: 6px !important;
+    font-size: 22px !important;
+  }
+
+  #signup .field-wrapper,
+  #forgot-password .field-wrapper,
+  #reset-password .field-wrapper {
+    margin-top: 8px !important;
+  }
+
+  #signup .field,
+  #forgot-password .field,
+  #reset-password .field {
+    height: 46px !important;
+    border-radius: 14px !important;
+  }
+
+  #signup .btn-primary,
+  #forgot-password .btn-primary,
+  #reset-password .btn-primary {
+    height: 48px !important;
+    border-radius: 24px !important;
+    margin-top: 12px !important;
+  }
+
+  /* Hide redundant fake home indicator on mobile devices */
+  .home-indicator {
+    display: none !important;
   }
 }
 
