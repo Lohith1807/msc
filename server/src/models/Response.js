@@ -100,6 +100,14 @@ const responseSchema = new mongoose.Schema(
   }
 );
 
+// High-Performance B-Tree Compound Indexes for fast retrieval
+responseSchema.index({ doctorId: 1, createdAt: -1 });
+responseSchema.index({ patientId: 1, createdAt: -1 });
+responseSchema.index({ userId: 1, createdAt: -1 });
+responseSchema.index({ evaluatorId: 1, createdAt: -1 });
+responseSchema.index({ doctorId: 1, patientId: 1 });
+responseSchema.index({ doctorId: 1, userId: 1 });
+
 const Response = mongoose.model('Response', responseSchema);
 
 export default Response;

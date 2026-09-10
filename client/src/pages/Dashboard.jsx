@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { platformAPI } from '../services/api';
+import { platformAPI, psychiatristAPI } from '../services/api';
 import TopBar from '../components/layout/TopBar';
 import Sidebar from '../components/layout/Sidebar';
 import StatCards from '../components/dashboard/StatCards';
@@ -11,14 +11,21 @@ import AdminResponses from '../components/admin/AdminResponses';
 import AdminUsers from '../components/admin/AdminUsers';
 import AdminLogs from '../components/admin/AdminLogs';
 import ProfileView from '../components/profile/ProfileView';
+import PsychiatristPatients from '../components/psychiatrist/PsychiatristPatients';
 import '../features/dashboard/dashboard.css';
 
 export default function Dashboard() {
   const { user, role, isAdmin } = useAuth();
-  const [activeView, setActiveView] = useState('cards'); // 'cards' | 'admin-cards' | 'responses' | 'users' | 'logs' | 'profile'
+  const [activeView, setActiveView] = useState('cards'); // 'cards' | 'admin-cards' | 'responses' | 'users' | 'logs' | 'profile' | 'psychiatrist-patients'
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const [stats, setStats] = useState({ totalCards: 0, totalUsers: 0, totalResponses: 0 });
+  const [stats, setStats] = useState({
+    totalCards: 0,
+    totalUsers: 0,
+    totalResponses: 0,
+    myTotalPatients: 0,
+    myPatientTotalResponses: 0,
+  });
   const [cards, setCards] = useState([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingCards, setIsLoadingCards] = useState(true);
@@ -26,10 +33,15 @@ export default function Dashboard() {
   // Selected Card for 3D inspection modal
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Load Stats from backend
+  // Load Stats from backend (scoped for psychiatrist, or global for admin)
   const loadStats = useCallback(async () => {
     try {
-      const res = await platformAPI.getStats();
+      let res;
+      if (role === 'psychiatrist') {
+        res = await psychiatristAPI.getStats();
+      } else {
+        res = await platformAPI.getStats();
+      }
       if (res.success && res.stats) {
         setStats(res.stats);
       }
@@ -38,7 +50,7 @@ export default function Dashboard() {
     } finally {
       setIsLoadingStats(false);
     }
-  }, []);
+  }, [role]);
 
   // Load Active Cards from backend for Home Page Carousel
   const loadCards = useCallback(async () => {
@@ -66,6 +78,16 @@ export default function Dashboard() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeView]);
+
+  // Security / Role guard: If psychiatrist, restrict to cards, profile, psychiatrist-patients
+  useEffect(() => {
+    if (role === 'psychiatrist') {
+      const allowedViews = ['cards', 'profile', 'psychiatrist-patients'];
+      if (!allowedViews.includes(activeView)) {
+        setActiveView('cards');
+      }
+    }
+  }, [role, activeView]);
 
   // Sidebar controls
   const handleToggleSidebar = () => {
@@ -117,11 +139,20 @@ export default function Dashboard() {
             <StatCards
               stats={stats}
               isLoading={isLoadingStats}
+              role={role}
               onCardClick={(targetView) => {
-                if (targetView === 'cards' && isAdmin) {
-                  setActiveView('admin-cards');
+                if (role === 'psychiatrist') {
+                  if (targetView === 'psychiatrist-patients') {
+                    setActiveView('psychiatrist-patients');
+                  } else {
+                    setActiveView('cards');
+                  }
                 } else {
-                  setActiveView(targetView);
+                  if (targetView === 'cards' && isAdmin) {
+                    setActiveView('admin-cards');
+                  } else {
+                    setActiveView(targetView);
+                  }
                 }
               }}
             />
@@ -130,6 +161,11 @@ export default function Dashboard() {
               onSelectCard={(card) => setSelectedCard(card)}
             />
           </>
+        )}
+
+        {/* Psychiatrist My Patients Module */}
+        {activeView === 'psychiatrist-patients' && (
+          <PsychiatristPatients onBackToHome={() => setActiveView('cards')} />
         )}
 
         {/* Admin Card Management */}

@@ -84,6 +84,11 @@ userSchema.statics.hashPassword = async function (password) {
   return bcrypt.hash(password, salt);
 };
 
+// High-Performance B-Tree Compound Indexes
+userSchema.index({ role: 1, doctors: 1 });
+userSchema.index({ role: 1, createdAt: -1 });
+userSchema.index({ role: 1, name: 1 });
+
 const User = mongoose.model('User', userSchema);
 
 export default User;

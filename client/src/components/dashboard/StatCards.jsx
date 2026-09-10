@@ -1,6 +1,11 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 
-export default function StatCards({ stats, isLoading, onCardClick }) {
+export default function StatCards({ stats, isLoading, onCardClick, role: propRole }) {
+  const { role: authRole } = useAuth();
+  const role = propRole || authRole;
+  const isPsychiatrist = role === 'psychiatrist';
+
   const cardsData = [
     {
       id: 'total-cards',
@@ -18,11 +23,11 @@ export default function StatCards({ stats, isLoading, onCardClick }) {
       bgLight: 'rgba(42, 159, 176, 0.12)',
     },
     {
-      id: 'total-users',
-      viewId: 'users',
-      title: 'Total Users',
-      count: stats?.totalUsers ?? 0,
-      label: 'Accounts',
+      id: isPsychiatrist ? 'my-total-patients' : 'total-users',
+      viewId: isPsychiatrist ? 'psychiatrist-patients' : 'users',
+      title: isPsychiatrist ? 'My Total Patients' : 'Total Users',
+      count: isPsychiatrist ? (stats?.myTotalPatients ?? 0) : (stats?.totalUsers ?? 0),
+      label: isPsychiatrist ? 'Consulted' : 'Accounts',
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -34,11 +39,11 @@ export default function StatCards({ stats, isLoading, onCardClick }) {
       bgLight: 'rgba(28, 58, 82, 0.1)',
     },
     {
-      id: 'total-responses',
-      viewId: 'responses',
-      title: 'Total Responses',
-      count: stats?.totalResponses ?? 0,
-      label: 'Reflections',
+      id: isPsychiatrist ? 'my-patient-responses' : 'total-responses',
+      viewId: isPsychiatrist ? 'psychiatrist-patients' : 'responses',
+      title: isPsychiatrist ? 'My Patient Total Responses' : 'Total Responses',
+      count: isPsychiatrist ? (stats?.myPatientTotalResponses ?? 0) : (stats?.totalResponses ?? 0),
+      label: isPsychiatrist ? 'Submissions' : 'Reflections',
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

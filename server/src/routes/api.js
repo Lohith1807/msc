@@ -24,7 +24,13 @@ import {
   deleteUser,
   getLogs,
 } from '../controllers/adminController.js';
-import { optionalAuth, requireAdmin } from '../middleware/authMiddleware.js';
+import {
+  getPsychiatristStats,
+  getPsychiatristPatients,
+  getPatientDetails,
+  getConsultationDetails,
+} from '../controllers/psychiatristController.js';
+import { optionalAuth, requireAuth, requireAdmin, requirePsychiatrist } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -64,5 +70,11 @@ router.delete('/users/:id', requireAdmin, deleteUser);
 
 // --- Activity Logs (Admin) ---
 router.get('/logs', getLogs);
+
+// --- Psychiatrist Portal Endpoints ---
+router.get('/psychiatrist/stats', requireAuth, requirePsychiatrist, getPsychiatristStats);
+router.get('/psychiatrist/patients', requireAuth, requirePsychiatrist, getPsychiatristPatients);
+router.get('/psychiatrist/patients/:patientId', requireAuth, requirePsychiatrist, getPatientDetails);
+router.get('/psychiatrist/consultations/:consultationId', requireAuth, requirePsychiatrist, getConsultationDetails);
 
 export default router;

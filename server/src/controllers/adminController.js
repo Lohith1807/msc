@@ -3,24 +3,38 @@ import User from '../models/User.js';
 import Response from '../models/Response.js';
 import Log from '../models/Log.js';
 import { recordLog } from '../utils/auditLogger.js';
+import appCache from '../utils/cacheService.js';
 
 // @route   GET /api/stats
 // @desc    Get system-wide stats for Dashboard Home
 export const getStats = async (req, res, next) => {
   try {
+    const cached = appCache.get('admin:stats');
+    if (cached) {
+      return res.status(200).json({
+        success: true,
+        stats: cached,
+        fromCache: true,
+      });
+    }
+
     const [totalCards, totalUsers, totalResponses] = await Promise.all([
       Card.countDocuments({ status: 'active' }),
       User.countDocuments(),
       Response.countDocuments(),
     ]);
 
+    const statsData = {
+      totalCards,
+      totalUsers,
+      totalResponses,
+    };
+
+    appCache.set('admin:stats', statsData, 30 * 1000);
+
     res.status(200).json({
       success: true,
-      stats: {
-        totalCards,
-        totalUsers,
-        totalResponses,
-      },
+      stats: statsData,
     });
   } catch (error) {
     next(error);
@@ -151,6 +165,10 @@ export const submitResponse = async (req, res, next) => {
       severity: 'success',
     });
 
+    // Invalidate cached statistics on new response submission
+    appCache.invalidatePrefix('admin:stats');
+    appCache.invalidatePrefix('psychiatrist:');
+
     res.status(201).json({
       success: true,
       message: 'Response submitted successfully!',
@@ -209,6 +227,9 @@ export const evaluateResponse = async (req, res, next) => {
       user: req.user || { name: evaluatorName, role: 'doctor' },
       severity: 'info',
     });
+
+    // Invalidate cached statistics on evaluation
+    appCache.invalidatePrefix('psychiatrist:');
 
     res.json({
       success: true,

@@ -254,4 +254,16 @@ export const platformAPI = {
   },
 };
 
-export default { authAPI, platformAPI };
+export const psychiatristAPI = {
+  getStats: () => request('/psychiatrist/stats', { method: 'GET' }),
+  getPatients: (search = '') =>
+    request(`/psychiatrist/patients${search ? `?search=${encodeURIComponent(search)}` : ''}`, {
+      method: 'GET',
+    }),
+  getPatientDetails: (patientId) =>
+    request(`/psychiatrist/patients/${patientId}`, { method: 'GET' }),
+  getConsultationDetails: (consultationId) =>
+    request(`/psychiatrist/consultations/${consultationId}`, { method: 'GET' }),
+};
+
+export default { authAPI, platformAPI, psychiatristAPI };

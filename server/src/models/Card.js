@@ -92,6 +92,9 @@ const cardSchema = new mongoose.Schema(
   }
 );
 
+// Index for fast status retrieval
+cardSchema.index({ status: 1 });
+
 const Card = mongoose.model('Card', cardSchema);
 
 export default Card;

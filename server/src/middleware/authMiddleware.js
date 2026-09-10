@@ -94,3 +94,21 @@ export const requireAdmin = (req, res, next) => {
     message: 'Access denied. Administrator privileges required.',
   });
 };
+
+export const requirePsychiatrist = (req, res, next) => {
+  // Allow if authenticated user has role 'psychiatrist' or 'admin'
+  if (req.user && (req.user.role === 'psychiatrist' || req.user.role === 'admin')) {
+    return next();
+  }
+
+  // If header x-user-role is psychiatrist or admin, allow
+  const headerRole = req.headers['x-user-role'];
+  if (headerRole === 'psychiatrist' || headerRole === 'admin') {
+    return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: 'Access denied. Psychiatrist privileges required.',
+  });
+};
