@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { calculateAge } from '../utils/dateUtils.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -34,12 +35,16 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'psychiatrist', 'user'],
+      enum: ['admin', 'psychiatrist', 'user', 'dev'],
       default: 'user',
     },
     phone: {
       type: String,
       default: '',
+    },
+    dob: {
+      type: Date,
+      default: null,
     },
     age: {
       type: Number,
@@ -60,6 +65,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: {
+      virtuals: true,
       transform(doc, ret) {
         ret.id = ret._id;
         delete ret._id;
@@ -67,6 +73,10 @@ const userSchema = new mongoose.Schema(
         delete ret.passwordHash;
         delete ret.resetPasswordToken;
         delete ret.resetPasswordExpires;
+        // Derive dynamic age from dob if present, fallback to stored age
+        if (ret.dob) {
+          ret.age = calculateAge(ret.dob);
+        }
         return ret;
       },
     },

@@ -30,7 +30,27 @@ import {
   getPatientDetails,
   getConsultationDetails,
 } from '../controllers/psychiatristController.js';
-import { optionalAuth, requireAuth, requireAdmin, requirePsychiatrist } from '../middleware/authMiddleware.js';
+import {
+  getUserDashboardStats,
+  getUserConsultations,
+  getUserConsultationDetails,
+  getAvailableDoctors,
+  createAppointment,
+  getUserAppointments,
+  getUserAppointmentDetails,
+} from '../controllers/userDashboardController.js';
+import {
+  getDevLogs,
+  getDevLogDetail,
+  updateDevLogStatus,
+  deleteDevLog,
+  clearResolvedLogs,
+  getDevNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  receiveFrontendError,
+} from '../controllers/devController.js';
+import { optionalAuth, requireAuth, requireAdmin, requirePsychiatrist, requireDev } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -76,5 +96,27 @@ router.get('/psychiatrist/stats', requireAuth, requirePsychiatrist, getPsychiatr
 router.get('/psychiatrist/patients', requireAuth, requirePsychiatrist, getPsychiatristPatients);
 router.get('/psychiatrist/patients/:patientId', requireAuth, requirePsychiatrist, getPatientDetails);
 router.get('/psychiatrist/consultations/:consultationId', requireAuth, requirePsychiatrist, getConsultationDetails);
+
+// --- User / Patient Portal Endpoints ---
+router.get('/user/stats', requireAuth, getUserDashboardStats);
+router.get('/user/consultations', requireAuth, getUserConsultations);
+router.get('/user/consultations/:id', requireAuth, getUserConsultationDetails);
+router.get('/user/doctors', requireAuth, getAvailableDoctors);
+router.post('/user/appointments', requireAuth, createAppointment);
+router.get('/user/appointments', requireAuth, getUserAppointments);
+router.get('/user/appointments/:id', requireAuth, getUserAppointmentDetails);
+
+// --- Dev Logs (Dev/Admin only) ---
+router.post('/dev/logs/frontend', receiveFrontendError);  // No auth required for frontend error collection
+router.get('/dev/logs', requireAuth, requireDev, getDevLogs);
+router.delete('/dev/logs/resolved', requireAuth, requireDev, clearResolvedLogs);
+router.get('/dev/logs/:id', requireAuth, requireDev, getDevLogDetail);
+router.patch('/dev/logs/:id/status', requireAuth, requireDev, updateDevLogStatus);
+router.delete('/dev/logs/:id', requireAuth, requireDev, deleteDevLog);
+
+// --- Dev Notifications ---
+router.get('/dev/notifications', requireAuth, requireDev, getDevNotifications);
+router.patch('/dev/notifications/read-all', requireAuth, requireDev, markAllNotificationsRead);
+router.patch('/dev/notifications/:id/read', requireAuth, requireDev, markNotificationRead);
 
 export default router;

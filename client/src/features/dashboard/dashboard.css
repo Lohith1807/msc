@@ -629,10 +629,10 @@ body::-webkit-scrollbar {
    ========================================================================== */
 .stat-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Always 3 square boxes in a row */
-  max-width: 580px; /* Neatly sized small square boxes */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Always 3 boxes in a row */
+  max-width: 660px; /* Generously sized boxes with ample room for titles */
   margin: 0 auto 28px;
-  gap: 16px;
+  gap: 18px;
   width: 100%;
 }
 
@@ -647,19 +647,20 @@ body::-webkit-scrollbar {
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 16px 10px;
+  padding: 18px 12px 14px;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   text-align: center;
-  aspect-ratio: 1 / 1; /* Pure square box */
+  min-height: 158px; /* Increased box height so words fit perfectly into next line without clipping */
+  height: auto;
   gap: 6px;
   position: relative;
-  overflow: hidden;
+  overflow: visible; /* Ensure letters and text never get clipped on the edges */
 }
 
 .stat-card:hover {
@@ -669,9 +670,9 @@ body::-webkit-scrollbar {
 }
 
 .stat-card-icon-wrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -687,7 +688,7 @@ body::-webkit-scrollbar {
   font-size: 26px;
   font-weight: 800;
   color: var(--color-primary);
-  line-height: 1;
+  line-height: 1.1;
   margin: 2px 0 0;
 }
 
@@ -695,14 +696,24 @@ body::-webkit-scrollbar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .stat-card-title {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--color-primary);
-  white-space: nowrap;
+  white-space: normal; /* Allow words to wrap into nextline cleanly */
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.32;
+  text-align: center;
+  text-wrap: balance; /* Modern line-balancing algorithm for aesthetic typography */
+  max-width: 100%;
+  padding: 0 2px;
 }
 
 .stat-card-sublabel {
@@ -710,8 +721,9 @@ body::-webkit-scrollbar {
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
   white-space: nowrap;
+  margin-top: 1px;
 }
 
 @media (max-width: 480px) {
@@ -4291,8 +4303,11 @@ select,
   }
 
   .stat-card {
-    padding: 10px 4px;
-    gap: 3px;
+    padding: 12px 6px 10px;
+    gap: 4px;
+    min-height: 142px;
+    height: auto;
+    overflow: visible;
   }
 
   .stat-card-icon-wrap {
@@ -4312,6 +4327,9 @@ select,
 
   .stat-card-title {
     font-size: 11px;
+    white-space: normal;
+    line-height: 1.25;
+    text-wrap: balance;
   }
 
   .stat-card-sublabel {

@@ -6,6 +6,7 @@ import { seedDatabase } from './config/seed.js';
 import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
+import { logDevError } from './utils/devErrorLogger.js';
 
 // Load environment variables
 dotenv.config();
@@ -85,6 +86,14 @@ app.use('/api', async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
+    // Log database connection failure as a critical dev error
+    logDevError({
+      err,
+      req,
+      errorType: 'DatabaseError',
+      severity: 'critical',
+      httpStatus: 503,
+    }).catch(() => {});
     next(err);
   }
 });
@@ -104,11 +113,34 @@ app.use((req, res) => {
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  const statusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || err.status || 500;
+
+  // Automatically log all errors to Dev Logs (async, non-blocking)
+  // Skip logging for 404s and auth errors to reduce noise
+  if (statusCode !== 404 && statusCode !== 401 && statusCode !== 403) {
+    logDevError({
+      err,
+      req,
+      httpStatus: statusCode,
+    }).catch(() => {});
+  } else if (statusCode === 503) {
+    // Always log service unavailable (DB down)
+    logDevError({
+      err,
+      req,
+      errorType: 'DatabaseError',
+      severity: 'critical',
+      httpStatus: 503,
+    }).catch(() => {});
+  }
+
+  // Never expose stack traces or technical details to end users
   res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal server error occurred.',
-    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
+    message:
+      statusCode >= 500
+        ? 'Something went wrong. Please try again later.'
+        : err.message || 'An error occurred.',
   });
 });
 

@@ -15,7 +15,35 @@ const generateToken = (userId) => {
 // @access  Public
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, dob } = req.body;
+
+    // Validate DOB
+    if (!dob) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date of birth is required.',
+        errors: { dob: 'Date of birth is required.' },
+      });
+    }
+
+    const birthDate = new Date(dob);
+    if (isNaN(birthDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid date of birth.',
+        errors: { dob: 'Please enter a valid date of birth.' },
+      });
+    }
+
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (birthDate > today) {
+      return res.status(400).json({
+        success: false,
+        message: 'Date of birth cannot be in the future.',
+        errors: { dob: 'Date of birth cannot be in the future.' },
+      });
+    }
 
     // Check if user with email already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -37,11 +65,12 @@ export const register = async (req, res, next) => {
     // Hash password
     const passwordHash = await User.hashPassword(password);
 
-    // Create user
+    // Create user with dob
     const user = await User.create({
       name,
       email: email.toLowerCase(),
       passwordHash,
+      dob: birthDate,
     });
 
     // Generate token
@@ -309,7 +338,7 @@ export const getMe = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res, next) => {
   try {
-    const { name, phone, bio, currentPassword, newPassword } = req.body;
+    const { name, phone, bio, dob, currentPassword, newPassword } = req.body;
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -319,6 +348,28 @@ export const updateProfile = async (req, res, next) => {
     if (name) user.name = name.trim();
     if (phone !== undefined) user.phone = phone.trim();
     if (bio !== undefined) user.bio = bio.trim();
+    if (dob !== undefined) {
+      if (!dob) {
+        user.dob = null;
+      } else {
+        const birthDate = new Date(dob);
+        if (isNaN(birthDate.getTime())) {
+          return res.status(400).json({
+            success: false,
+            message: 'Please enter a valid date of birth.',
+          });
+        }
+        const today = new Date();
+        today.setHours(23, 59, 59, 999);
+        if (birthDate > today) {
+          return res.status(400).json({
+            success: false,
+            message: 'Date of birth cannot be in the future.',
+          });
+        }
+        user.dob = birthDate;
+      }
+    }
 
     let passwordChanged = false;
     // Password change check

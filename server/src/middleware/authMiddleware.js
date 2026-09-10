@@ -79,19 +79,37 @@ export const optionalAuth = async (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  // Allow if authenticated user has role 'admin'
-  if (req.user && req.user.role === 'admin') {
+  // Allow if authenticated user has role 'admin' or 'dev'
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'dev')) {
     return next();
   }
 
-  // If header x-user-role is admin, allow
-  if (req.headers['x-user-role'] === 'admin') {
+  // If header x-user-role is admin or dev, allow
+  const headerRole = req.headers['x-user-role'];
+  if (headerRole === 'admin' || headerRole === 'dev') {
     return next();
   }
 
   return res.status(403).json({
     success: false,
     message: 'Access denied. Administrator privileges required.',
+  });
+};
+
+export const requireDev = (req, res, next) => {
+  // Allow only 'dev' role to access dev-specific endpoints
+  if (req.user && req.user.role === 'dev') {
+    return next();
+  }
+
+  // If header x-user-role is dev, allow
+  if (req.headers['x-user-role'] === 'dev') {
+    return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: 'Access denied. Developer privileges required.',
   });
 };
 

@@ -17,7 +17,92 @@ export default function Sidebar({ isOpen, onClose, activeView, onSelectView }) {
 
   let navItems = [];
 
-  if (role === 'psychiatrist') {
+  if (role === 'dev') {
+    navItems = [
+      {
+        id: 'cards',
+        label: 'Home',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        badge: null,
+      },
+      {
+        id: 'profile',
+        label: 'My Profile & Info',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ),
+        badge: null,
+      },
+      {
+        id: 'admin-cards',
+        label: 'Manage Cards',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        badge: 'Admin',
+      },
+      {
+        id: 'responses',
+        label: 'User Responses',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ),
+        badge: null,
+      },
+      {
+        id: 'users',
+        label: 'Total Users',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ),
+        badge: null,
+      },
+      {
+        id: 'logs',
+        label: 'Logs',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" strokeWidth="2" />
+            <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" />
+            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <polyline points="10 9 9 9 8 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ),
+        badge: null,
+      },
+      {
+        id: 'dev-logs',
+        label: 'Dev Logs',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2"/>
+            <path d="M12 8v4l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M8 2.5C6 4 4.5 6 4 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M16 2.5C18 4 19.5 6 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        ),
+        badge: 'Dev',
+      },
+    ];
+  } else if (role === 'psychiatrist') {
     navItems = [
       {
         id: 'cards',
@@ -150,6 +235,32 @@ export default function Sidebar({ isOpen, onClose, activeView, onSelectView }) {
         ),
         badge: null,
       },
+      {
+        id: 'book-appointment',
+        label: 'Book An Appointment',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="12" y1="14" x2="12" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="10" y1="16" x2="14" y2="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        badge: null,
+      },
+      {
+        id: 'booking-history',
+        label: 'Booking History',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+            <polyline points="12 6 12 12 16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        ),
+        badge: null,
+      },
     ];
   }
 
@@ -188,7 +299,7 @@ export default function Sidebar({ isOpen, onClose, activeView, onSelectView }) {
             <div>
               <h2 className="sidebar-brand-title">Mind Lab</h2>
               <span className="sidebar-role-indicator">
-                {role === 'admin' ? 'Administrator Portal' : role === 'psychiatrist' ? 'Clinician Portal' : 'Member Portal'}
+                {role === 'admin' ? 'Administrator Portal' : role === 'dev' ? 'Developer Portal' : role === 'psychiatrist' ? 'Clinician Portal' : 'Member Portal'}
               </span>
             </div>
           </div>

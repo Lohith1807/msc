@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
+import { calculateAge, getTodayDateString } from '../../utils/dateUtils';
 
 export default function ProfileView({ onSelectView }) {
   const { user, role, logout, updateUserData } = useAuth();
@@ -10,6 +11,16 @@ export default function ProfileView({ onSelectView }) {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const [dob, setDob] = useState(() => {
+    if (user?.dob) {
+      try {
+        return new Date(user.dob).toISOString().split('T')[0];
+      } catch {
+        return user.dob;
+      }
+    }
+    return '';
+  });
 
   React.useEffect(() => {
     if (user) {
@@ -17,8 +28,20 @@ export default function ProfileView({ onSelectView }) {
       setEmail(user.email || '');
       setPhone(user.phone || '');
       setBio(user.bio || '');
+      if (user.dob) {
+        try {
+          setDob(new Date(user.dob).toISOString().split('T')[0]);
+        } catch {
+          setDob(user.dob);
+        }
+      } else {
+        setDob('');
+      }
     }
   }, [user]);
+
+  // Dynamically calculate age from DOB
+  const calculatedAge = calculateAge(dob) ?? user?.age ?? null;
 
   // Password Change State
   const [currentPassword, setCurrentPassword] = useState('');
@@ -48,6 +71,16 @@ export default function ProfileView({ onSelectView }) {
       return;
     }
 
+    if (dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (birthDate > today) {
+        setErrorMessage('Date of birth cannot be in the future.');
+        return;
+      }
+    }
+
     setIsSaving(true);
     setErrorMessage('');
     setSuccessMessage('');
@@ -57,6 +90,7 @@ export default function ProfileView({ onSelectView }) {
         name: name.trim(),
         phone: phone.trim(),
         bio: bio.trim(),
+        dob: dob || null,
       });
 
       if (res.success && res.user) {
@@ -69,6 +103,8 @@ export default function ProfileView({ onSelectView }) {
           name: name.trim(),
           phone: phone.trim(),
           bio: bio.trim(),
+          dob: dob || null,
+          age: calculateAge(dob) ?? user?.age ?? null,
         });
         setSuccessMessage('Profile information updated successfully!');
       }
@@ -79,6 +115,8 @@ export default function ProfileView({ onSelectView }) {
         name: name.trim(),
         phone: phone.trim(),
         bio: bio.trim(),
+        dob: dob || null,
+        age: calculateAge(dob) ?? user?.age ?? null,
       });
       setSuccessMessage('Profile information updated successfully!');
     } finally {
@@ -151,6 +189,14 @@ export default function ProfileView({ onSelectView }) {
                 <span className="profile-verified-badge">
                   ✓ Verified MindLab Account
                 </span>
+                {calculatedAge !== null && (
+                  <span
+                    className="profile-verified-badge"
+                    style={{ background: '#e0f2fe', color: '#0369a1', borderColor: '#bae6fd' }}
+                  >
+                    Age: {calculatedAge} yrs
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -201,6 +247,53 @@ export default function ProfileView({ onSelectView }) {
                   className="input-disabled"
                   title="Email is tied to your primary account identifier"
                 />
+              </div>
+
+              <div className="form-field">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ margin: 0 }}>Date of Birth</label>
+                  {calculatedAge !== null && (
+                    <span
+                      id="profileCalculatedAgeBadge"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        background: 'rgba(13, 148, 136, 0.1)',
+                        color: '#0d9488',
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        border: '1px solid rgba(13, 148, 136, 0.25)',
+                      }}
+                    >
+                      Age: {calculatedAge} years old
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="date"
+                  id="profileDobInput"
+                  name="dob"
+                  max={getTodayDateString()}
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    border: '1.5px solid #cbd5e1',
+                    fontSize: '14px',
+                    color: '#0f172a',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                {dob && calculatedAge !== null && (
+                  <span style={{ display: 'block', marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
+                    Age is calculated dynamically as <strong>{calculatedAge} years old</strong> based on current date.
+                  </span>
+                )}
               </div>
 
               <div className="form-field">

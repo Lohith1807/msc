@@ -266,4 +266,61 @@ export const psychiatristAPI = {
     request(`/psychiatrist/consultations/${consultationId}`, { method: 'GET' }),
 };
 
-export default { authAPI, platformAPI, psychiatristAPI };
+export const userDashboardAPI = {
+  getStats: () => request('/user/stats', { method: 'GET' }),
+  getConsultations: () => request('/user/consultations', { method: 'GET' }),
+  getConsultationDetails: (id) => request(`/user/consultations/${id}`, { method: 'GET' }),
+  getDoctors: () => request('/user/doctors', { method: 'GET' }),
+  bookAppointment: (data) =>
+    request('/user/appointments', {
+      method: 'POST',
+      body: data,
+    }),
+  getAppointments: () => request('/user/appointments', { method: 'GET' }),
+  getAppointmentDetails: (id) => request(`/user/appointments/${id}`, { method: 'GET' }),
+};
+
+export const devAPI = {
+  // Dev Logs
+  getLogs: (params = {}) => {
+    const cleanParams = {};
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== '' && value !== 'undefined') {
+        cleanParams[key] = value;
+      }
+    }
+    const query = new URLSearchParams(cleanParams).toString();
+    return request(`/dev/logs${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
+
+  getLogDetail: (id) => request(`/dev/logs/${id}`, { method: 'GET' }),
+
+  updateLogStatus: (id, status) =>
+    request(`/dev/logs/${id}/status`, {
+      method: 'PATCH',
+      body: { status },
+    }),
+
+  deleteLog: (id) => request(`/dev/logs/${id}`, { method: 'DELETE' }),
+
+  clearResolvedLogs: () => request('/dev/logs/resolved', { method: 'DELETE' }),
+
+  // Dev Notifications
+  getNotifications: () => request('/dev/notifications', { method: 'GET' }),
+
+  markNotificationRead: (id) =>
+    request(`/dev/notifications/${id}/read`, { method: 'PATCH' }),
+
+  markAllNotificationsRead: () =>
+    request('/dev/notifications/read-all', { method: 'PATCH' }),
+
+  // Frontend error ingestion
+  reportFrontendError: (errorData) =>
+    request('/dev/logs/frontend', {
+      method: 'POST',
+      body: errorData,
+    }),
+};
+
+export default { authAPI, platformAPI, psychiatristAPI, userDashboardAPI, devAPI };
+

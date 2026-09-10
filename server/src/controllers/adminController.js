@@ -4,6 +4,7 @@ import Response from '../models/Response.js';
 import Log from '../models/Log.js';
 import { recordLog } from '../utils/auditLogger.js';
 import appCache from '../utils/cacheService.js';
+import { calculateAge } from '../utils/dateUtils.js';
 
 // @route   GET /api/stats
 // @desc    Get system-wide stats for Dashboard Home
@@ -451,7 +452,8 @@ export const searchPatients = async (req, res, next) => {
         name: p.name,
         email: p.email,
         phone: p.phone || '',
-        age: p.age || null,
+        dob: p.dob || null,
+        age: p.dob ? calculateAge(p.dob) : (p.age || null),
       })),
     });
   } catch (error) {
@@ -493,7 +495,8 @@ export const selectPatient = async (req, res, next) => {
         name: patient.name,
         email: patient.email,
         phone: patient.phone || '',
-        age: patient.age || null,
+        dob: patient.dob || null,
+        age: patient.dob ? calculateAge(patient.dob) : (patient.age || null),
       },
     });
   } catch (error) {

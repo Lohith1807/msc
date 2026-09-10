@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { platformAPI, psychiatristAPI } from '../services/api';
+import { platformAPI, psychiatristAPI, userDashboardAPI } from '../services/api';
 import TopBar from '../components/layout/TopBar';
 import Sidebar from '../components/layout/Sidebar';
 import StatCards from '../components/dashboard/StatCards';
@@ -12,11 +12,15 @@ import AdminUsers from '../components/admin/AdminUsers';
 import AdminLogs from '../components/admin/AdminLogs';
 import ProfileView from '../components/profile/ProfileView';
 import PsychiatristPatients from '../components/psychiatrist/PsychiatristPatients';
+import UserConsultationsList from '../components/user/UserConsultationsList';
+import BookAppointment from '../components/user/BookAppointment';
+import BookingHistory from '../components/user/BookingHistory';
+import DevLogs from '../components/dev/DevLogs';
 import '../features/dashboard/dashboard.css';
 
 export default function Dashboard() {
-  const { user, role, isAdmin } = useAuth();
-  const [activeView, setActiveView] = useState('cards'); // 'cards' | 'admin-cards' | 'responses' | 'users' | 'logs' | 'profile' | 'psychiatrist-patients'
+  const { user, role, isAdmin, isDev } = useAuth();
+  const [activeView, setActiveView] = useState('cards'); // 'cards' | 'admin-cards' | 'responses' | 'users' | 'logs' | 'profile' | 'psychiatrist-patients' | 'book-appointment' | 'booking-history' | 'dev-logs'
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [stats, setStats] = useState({
@@ -25,6 +29,9 @@ export default function Dashboard() {
     totalResponses: 0,
     myTotalPatients: 0,
     myPatientTotalResponses: 0,
+    myTotalBookedAppointments: 0,
+    totalConsultations: 0,
+    evaluatedConsultations: 0,
   });
   const [cards, setCards] = useState([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
@@ -33,13 +40,16 @@ export default function Dashboard() {
   // Selected Card for 3D inspection modal
   const [selectedCard, setSelectedCard] = useState(null);
 
-  // Load Stats from backend (scoped for psychiatrist, or global for admin)
+  // Load Stats from backend (scoped for user, psychiatrist, or global for admin/dev)
   const loadStats = useCallback(async () => {
     try {
       let res;
-      if (role === 'psychiatrist') {
+      if (role === 'user') {
+        res = await userDashboardAPI.getStats();
+      } else if (role === 'psychiatrist') {
         res = await psychiatristAPI.getStats();
       } else {
+        // admin and dev both use platform-wide stats
         res = await platformAPI.getStats();
       }
       if (res.success && res.stats) {
@@ -52,10 +62,13 @@ export default function Dashboard() {
     }
   }, [role]);
 
-  // Load Active Cards from backend for Home Page Carousel
+  // Load Active Cards from backend for Home Page Carousel (Admin/Psychiatrist)
   const loadCards = useCallback(async () => {
+    if (role === 'user') {
+      setIsLoadingCards(false);
+      return;
+    }
     try {
-      // Home page carousel strictly shows active cards
       const res = await platformAPI.getCards(false);
       if (res.success && res.cards) {
         const activeCards = (res.cards || []).filter((c) => c.status === 'active');
@@ -66,7 +79,7 @@ export default function Dashboard() {
     } finally {
       setIsLoadingCards(false);
     }
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     if (activeView === 'cards') {
@@ -79,14 +92,26 @@ export default function Dashboard() {
     window.scrollTo(0, 0);
   }, [activeView]);
 
-  // Security / Role guard: If psychiatrist, restrict to cards, profile, psychiatrist-patients
+  // Security / Role guard: Enforce strict module access per role
   useEffect(() => {
     if (role === 'psychiatrist') {
       const allowedViews = ['cards', 'profile', 'psychiatrist-patients'];
       if (!allowedViews.includes(activeView)) {
         setActiveView('cards');
       }
+    } else if (role === 'user') {
+      const allowedViews = ['cards', 'profile', 'book-appointment', 'booking-history'];
+      if (!allowedViews.includes(activeView)) {
+        setActiveView('cards');
+      }
+    } else if (role === 'dev') {
+      // dev gets all admin views + dev-logs
+      const allowedViews = ['cards', 'profile', 'admin-cards', 'responses', 'users', 'logs', 'dev-logs'];
+      if (!allowedViews.includes(activeView)) {
+        setActiveView('cards');
+      }
     }
+    // admin has no restriction
   }, [role, activeView]);
 
   // Sidebar controls
@@ -104,7 +129,7 @@ export default function Dashboard() {
 
   // Triggered when a response is submitted inside the CardModal
   const handleResponseSubmitted = () => {
-    loadStats(); // Update total responses count live!
+    loadStats(); // Update stats live!
   };
 
   // Triggered when cards are created, updated, or deleted
@@ -133,7 +158,7 @@ export default function Dashboard() {
 
       {/* 3. Main Dashboard Content Area */}
       <main className="dashboard-main-area">
-        {/* Home View (Default): 3 Stat Cards in a row + 3D Card Carousel */}
+        {/* Home View (Default): 3 Stat Cards in a row */}
         {activeView === 'cards' && (
           <>
             <StatCards
@@ -141,7 +166,13 @@ export default function Dashboard() {
               isLoading={isLoadingStats}
               role={role}
               onCardClick={(targetView) => {
-                if (role === 'psychiatrist') {
+                if (role === 'user') {
+                  if (targetView === 'booking-history') {
+                    setActiveView('booking-history');
+                  } else {
+                    setActiveView('cards');
+                  }
+                } else if (role === 'psychiatrist') {
                   if (targetView === 'psychiatrist-patients') {
                     setActiveView('psychiatrist-patients');
                   } else {
@@ -156,11 +187,32 @@ export default function Dashboard() {
                 }
               }}
             />
-            <CardCarousel
-              cards={cards}
-              onSelectCard={(card) => setSelectedCard(card)}
-            />
+
+            {/* If User Role: Show Consultation List below the 3 Stat Boxes */}
+            {role === 'user' ? (
+              <UserConsultationsList onSelectView={handleSelectView} />
+            ) : (
+              <CardCarousel
+                cards={cards}
+                onSelectCard={(card) => setSelectedCard(card)}
+              />
+            )}
           </>
+        )}
+
+        {/* User Book An Appointment Module */}
+        {activeView === 'book-appointment' && (
+          <BookAppointment
+            onAppointmentBooked={loadStats}
+            onNavigateToHistory={() => setActiveView('booking-history')}
+          />
+        )}
+
+        {/* User Booking History Module */}
+        {activeView === 'booking-history' && (
+          <BookingHistory
+            onNavigateToBook={() => setActiveView('book-appointment')}
+          />
         )}
 
         {/* Psychiatrist My Patients Module */}
@@ -229,6 +281,22 @@ export default function Dashboard() {
               </button>
             </div>
             <AdminLogs />
+          </>
+        )}
+
+        {/* Dev Logs (dev role only) */}
+        {activeView === 'dev-logs' && (role === 'dev' || role === 'admin') && (
+          <>
+            <div className="view-breadcrumb-bar">
+              <button
+                type="button"
+                className="btn-back-home"
+                onClick={() => setActiveView('cards')}
+              >
+                ← Back to Home
+              </button>
+            </div>
+            <DevLogs />
           </>
         )}
 

@@ -20,6 +20,7 @@ export const seedDatabase = async () => {
       const adminPass = await User.hashPassword('HELLO123');
       const psychPass = await User.hashPassword('Psych@123');
       const userPass = await User.hashPassword('User@123');
+      const devPass = await User.hashPassword('Dev@123456');
 
       adminUser = await User.create({
         name: 'MindLab Administrator',
@@ -42,7 +43,14 @@ export const seedDatabase = async () => {
         role: 'user',
       });
 
-      console.log('✅ Default users seeded (lohithreddy1819@gmail.com, lohithreddy18april@gmail.com, lohithreddy18k@gmail.com)');
+      await User.create({
+        name: 'Dev Engineer',
+        email: 'dev@mindlab.app',
+        passwordHash: devPass,
+        role: 'dev',
+      });
+
+      console.log('✅ Default users seeded (lohithreddy1819@gmail.com, lohithreddy18april@gmail.com, lohithreddy18k@gmail.com, dev@mindlab.app)');
     }
 
     // 2. Seed Cards if count is 0

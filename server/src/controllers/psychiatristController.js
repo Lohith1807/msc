@@ -3,6 +3,7 @@ import Card from '../models/Card.js';
 import User from '../models/User.js';
 import Response from '../models/Response.js';
 import appCache from '../utils/cacheService.js';
+import { calculateAge } from '../utils/dateUtils.js';
 
 /**
  * Helper to get the authenticated psychiatrist ID from req.user
@@ -242,7 +243,8 @@ export const getPsychiatristPatients = async (req, res, next) => {
         name: patient.name,
         email: patient.email,
         phone: patient.phone || '',
-        age: patient.age || null,
+        dob: patient.dob || null,
+        age: patient.dob ? calculateAge(patient.dob) : (patient.age || null),
         bio: patient.bio || '',
         consultationCount: stats ? stats.consultationCount : 0,
         lastConsultationDate: stats ? stats.lastConsultationDate : null,
@@ -364,7 +366,8 @@ export const getPatientDetails = async (req, res, next) => {
         name: patient.name,
         email: patient.email,
         phone: patient.phone || '',
-        age: patient.age || null,
+        dob: patient.dob || null,
+        age: patient.dob ? calculateAge(patient.dob) : (patient.age || null),
         bio: patient.bio || '',
         createdAt: patient.createdAt,
       },
@@ -446,7 +449,8 @@ export const getConsultationDetails = async (req, res, next) => {
         patientName: patientData?.name || response.patientName || response.userName || 'Patient',
         patientEmail: patientData?.email || response.userEmail || '',
         patientPhone: patientData?.phone || '',
-        patientAge: patientData?.age || null,
+        patientDob: patientData?.dob || null,
+        patientAge: patientData?.dob ? calculateAge(patientData.dob) : (patientData?.age || null),
         consultationDateFormatted: `${day} ${month} ${year}, ${time}`,
         consultationDateShort: `${day} ${month} ${year}`,
         createdAt: response.createdAt,

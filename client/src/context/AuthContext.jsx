@@ -158,10 +158,10 @@ export function AuthProvider({ children }) {
     }
   }, [saveAuthSession]);
 
-  const register = useCallback(async (name, email, password) => {
+  const register = useCallback(async (name, email, password, dob) => {
     setIsLoading(true);
     try {
-      const data = await authAPI.register({ name, email, password });
+      const data = await authAPI.register({ name, email, password, dob });
       saveAuthSession(data.token, data.user);
       return data;
     } finally {
@@ -196,6 +196,7 @@ export function AuthProvider({ children }) {
     role: user?.role || 'user',
     isAdmin: user?.role === 'admin',
     isPsychiatrist: user?.role === 'psychiatrist',
+    isDev: user?.role === 'dev',
     isAuthenticated: Boolean(token && user),
     isLoading,
     initialLoading,

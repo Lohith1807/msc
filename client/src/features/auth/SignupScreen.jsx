@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Logo from './Logo';
 import { useAuth } from '../../context/AuthContext';
+import { calculateAge, getTodayDateString } from '../../utils/dateUtils';
 
 export default function SignupScreen({
   onBack,
@@ -11,6 +12,7 @@ export default function SignupScreen({
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [dob, setDob] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +31,21 @@ export default function SignupScreen({
       errs.email = 'Please enter your email address.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       errs.email = 'Please enter a valid email address.';
+    }
+
+    if (!dob) {
+      errs.dob = 'Please enter your date of birth.';
+    } else {
+      const birthDate = new Date(dob);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (isNaN(birthDate.getTime())) {
+        errs.dob = 'Please enter a valid date of birth.';
+      } else if (birthDate > today) {
+        errs.dob = 'Date of birth cannot be in the future.';
+      } else if (birthDate < new Date('1900-01-01')) {
+        errs.dob = 'Please enter a realistic date of birth.';
+      }
     }
 
     if (!password) {
@@ -56,7 +73,7 @@ export default function SignupScreen({
     }
 
     try {
-      await register(name.trim(), email.trim(), password);
+      await register(name.trim(), email.trim(), password, dob);
       if (onSignupSuccess) {
         onSignupSuccess();
       }
@@ -173,6 +190,61 @@ export default function SignupScreen({
               />
             </div>
             {errors.email && <span className="field-error-text">{errors.email}</span>}
+          </div>
+
+          {/* Date of Birth Field - Directly below Email */}
+          <div className="field-wrapper">
+            <div
+              className={`field field-dob ${errors.dob ? 'has-error' : ''}`}
+              onClick={(e) => {
+                if (e.target.tagName !== 'INPUT') {
+                  const el = document.getElementById('signupDobInput');
+                  if (el) {
+                    try {
+                      el.showPicker ? el.showPicker() : el.focus();
+                    } catch {
+                      el.focus();
+                    }
+                  }
+                }
+              }}
+            >
+              <svg width="18" height="19" viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3"
+                  y="4"
+                  width="18"
+                  height="18"
+                  rx="3"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                />
+                <path
+                  d="M16 2v4M8 2v4M3 10h18"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <div className="dob-input-container">
+                {!dob && <span className="dob-floating-placeholder">Date of Birth</span>}
+                <input
+                  type="date"
+                  id="signupDobInput"
+                  name="dob"
+                  max={getTodayDateString()}
+                  value={dob}
+                  onChange={(e) => {
+                    setDob(e.target.value);
+                    if (errors.dob) setErrors((prev) => ({ ...prev, dob: null }));
+                  }}
+                  aria-label="Date of Birth"
+                  title="Select your Date of Birth"
+                />
+              </div>
+            </div>
+            {errors.dob && <span className="field-error-text">{errors.dob}</span>}
           </div>
 
           <div className="field-wrapper">
