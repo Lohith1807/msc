@@ -17,26 +17,27 @@ export const seedDatabase = async () => {
     // 1. Seed Users if count is 0
     if (userCount === 0) {
       console.log('🌱 Seeding initial users...');
+      const devPass   = await User.hashPassword('Dev@123456');
       const adminPass = await User.hashPassword('HELLO123');
-      const psychPass = await User.hashPassword('Psych@123');
-      const userPass = await User.hashPassword('User@123');
-      const devPass = await User.hashPassword('Dev@123456');
+      const userPass  = await User.hashPassword('User@123');
 
-      adminUser = await User.create({
-        name: 'MindLab Administrator',
+      // lohithreddy1819 → dev role (primary developer account)
+      await User.create({
+        name: 'MindLab Developer',
         email: 'lohithreddy1819@gmail.com',
+        passwordHash: devPass,
+        role: 'dev',
+      });
+
+      // lohithreddy18april → admin role
+      await User.create({
+        name: 'MindLab Administrator',
+        email: 'lohithreddy18april@gmail.com',
         passwordHash: adminPass,
         role: 'admin',
       });
 
-      const psychUser = await User.create({
-        name: 'Dr. Sarah Jenkins',
-        email: 'lohithreddy18april@gmail.com',
-        passwordHash: psychPass,
-        role: 'psychiatrist',
-      });
-
-      const user1 = await User.create({
+      await User.create({
         name: 'Alex Chen',
         email: 'lohithreddy18k@gmail.com',
         passwordHash: userPass,
@@ -50,8 +51,9 @@ export const seedDatabase = async () => {
         role: 'dev',
       });
 
-      console.log('✅ Default users seeded (lohithreddy1819@gmail.com, lohithreddy18april@gmail.com, lohithreddy18k@gmail.com, dev@mindlab.app)');
+      console.log('✅ Default users seeded (lohithreddy1819@gmail.com [dev], lohithreddy18april@gmail.com [admin], lohithreddy18k@gmail.com [user], dev@mindlab.app [dev])');
     }
+
 
     // 2. Seed Cards if count is 0
 

@@ -344,10 +344,20 @@ export const createUser = async (req, res, next) => {
 export const updateUserRole = async (req, res, next) => {
   try {
     const { role } = req.body;
-    if (!['admin', 'psychiatrist', 'user'].includes(role)) {
-      return res.status(400).json({
+    const requestingUserRole = req.user?.role;
+
+    // Only dev users can assign the 'dev' role — backend enforcement
+    const allowedRoles = ['admin', 'psychiatrist', 'user'];
+    if (requestingUserRole === 'dev') {
+      allowedRoles.push('dev');
+    }
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(403).json({
         success: false,
-        message: 'Invalid role. Must be admin, psychiatrist, or user',
+        message: role === 'dev'
+          ? 'Only dev users can assign the dev role.'
+          : 'Invalid role. Must be admin, psychiatrist, or user.',
       });
     }
 
@@ -387,8 +397,10 @@ export const deleteUser = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    if (user.role === 'admin' && user.email === 'lohithreddy1819@gmail.com') {
-      return res.status(403).json({ success: false, message: 'Primary admin account cannot be deleted.' });
+    // Protect primary seed accounts from deletion
+    const protectedEmails = ['lohithreddy1819@gmail.com', 'lohithreddy18april@gmail.com'];
+    if (protectedEmails.includes(user.email)) {
+      return res.status(403).json({ success: false, message: 'Primary seed account cannot be deleted.' });
     }
 
     const userName = user.name;

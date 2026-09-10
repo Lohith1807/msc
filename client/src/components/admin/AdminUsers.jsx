@@ -6,6 +6,8 @@ import CustomSelect from '../common/CustomSelect';
 
 export default function AdminUsers({ onUsersUpdated }) {
   const { role: currentUserRole } = useAuth();
+  const isDev = currentUserRole === 'dev';
+  const canManageRoles = currentUserRole === 'admin' || currentUserRole === 'dev';
   const { confirm, toast } = useDialog();
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -184,6 +186,7 @@ export default function AdminUsers({ onUsersUpdated }) {
                 { value: 'admin', label: 'Admin' },
                 { value: 'psychiatrist', label: 'Psychiatrist' },
                 { value: 'user', label: 'User' },
+                ...(isDev ? [{ value: 'dev', label: 'Dev' }] : []),
               ]}
             />
           </div>
@@ -221,13 +224,13 @@ export default function AdminUsers({ onUsersUpdated }) {
                 <th>Assigned Role</th>
                 <th>Submitted Reflections</th>
                 <th>Joined Date</th>
-                {currentUserRole === 'admin' && <th>Role Management</th>}
+                {canManageRoles && <th>Role Management</th>}
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={currentUserRole === 'admin' ? 5 : 4} style={{ textAlign: 'center', padding: '40px' }}>
+                  <td colSpan={canManageRoles ? 5 : 4} style={{ textAlign: 'center', padding: '40px' }}>
                     <div className="empty-table-state">
                       <p>Loading registered accounts...</p>
                     </div>
@@ -235,7 +238,7 @@ export default function AdminUsers({ onUsersUpdated }) {
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={currentUserRole === 'admin' ? 5 : 4} style={{ textAlign: 'center', padding: '40px' }}>
+                  <td colSpan={canManageRoles ? 5 : 4} style={{ textAlign: 'center', padding: '40px' }}>
                     <div className="empty-table-state">
                       <span>👥</span>
                       <p>No user accounts found matching this filter.</p>
@@ -271,7 +274,7 @@ export default function AdminUsers({ onUsersUpdated }) {
                       {new Date(u.createdAt).toLocaleDateString()}
                     </span>
                   </td>
-                  {currentUserRole === 'admin' && (
+                  {canManageRoles && (
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <CustomSelect
@@ -282,9 +285,12 @@ export default function AdminUsers({ onUsersUpdated }) {
                             { value: 'user', label: 'User' },
                             { value: 'psychiatrist', label: 'Psychiatrist' },
                             { value: 'admin', label: 'Admin' },
+                            // 'dev' role option only visible to dev users
+                            ...(isDev ? [{ value: 'dev', label: 'Dev' }] : []),
                           ]}
                         />
-                        {u.email !== 'lohithreddy1819@gmail.com' && (
+                        {/* Protect seed accounts from deletion */}
+                        {u.email !== 'lohithreddy1819@gmail.com' && u.email !== 'lohithreddy18april@gmail.com' && (
                           <button
                             type="button"
                             className="btn-delete-user"
@@ -387,6 +393,8 @@ export default function AdminUsers({ onUsersUpdated }) {
                     { value: 'user', label: 'User (Standard Access)' },
                     { value: 'psychiatrist', label: 'Psychiatrist (Clinical Review)' },
                     { value: 'admin', label: 'Admin (Full Management)' },
+                    // 'dev' role only assignable by dev users
+                    ...(isDev ? [{ value: 'dev', label: 'Dev (Developer Access)' }] : []),
                   ]}
                   disabled={isSubmittingUser}
                 />
