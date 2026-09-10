@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { platformAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { useDialog } from '../../context/DialogContext';
 import CustomSelect from '../common/CustomSelect';
 
 export default function AdminUsers({ onUsersUpdated }) {
   const { role: currentUserRole } = useAuth();
+  const { confirm, toast } = useDialog();
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,24 +49,34 @@ export default function AdminUsers({ onUsersUpdated }) {
   const handleRoleChange = async (userId, newRole) => {
     try {
       await platformAPI.updateUserRole(userId, newRole);
+      toast.success(`User role updated to ${newRole}`);
       setSuccessMessage(`User role updated to ${newRole}`);
       loadUsers();
       if (onUsersUpdated) onUsersUpdated();
     } catch (err) {
+      toast.error(err.message || 'Failed to update user role');
       setErrorMessage(err.message || 'Failed to update user role');
     }
   };
 
   const handleDeleteUser = async (userId, userName) => {
-    if (!window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+    const isConfirmed = await confirm({
+      title: 'Delete User Account',
+      message: `Are you sure you want to delete user "${userName}"? This action cannot be undone.`,
+      confirmText: 'Delete User',
+      variant: 'danger',
+    });
+    if (!isConfirmed) {
       return;
     }
     try {
       await platformAPI.deleteUser(userId);
+      toast.success(`User "${userName}" deleted successfully.`);
       setSuccessMessage(`User "${userName}" deleted successfully.`);
       loadUsers();
       if (onUsersUpdated) onUsersUpdated();
     } catch (err) {
+      toast.error(err.message || 'Failed to delete user');
       setErrorMessage(err.message || 'Failed to delete user');
     }
   };
@@ -83,12 +95,14 @@ export default function AdminUsers({ onUsersUpdated }) {
     setIsSubmittingUser(true);
     try {
       await platformAPI.createUser(newUserData);
+      toast.success(`User "${newUserData.name}" created successfully!`);
       setSuccessMessage(`User "${newUserData.name}" created successfully!`);
       setIsAddUserModalOpen(false);
       setNewUserData({ name: '', email: '', password: '', role: 'user' });
       loadUsers();
       if (onUsersUpdated) onUsersUpdated();
     } catch (err) {
+      toast.error(err.message || 'Failed to create user account.');
       setModalError(err.message || 'Failed to create user account.');
     } finally {
       setIsSubmittingUser(false);

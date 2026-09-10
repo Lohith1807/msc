@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { DialogProvider } from './context/DialogContext';
 import AuthLayout from './features/auth/AuthLayout';
 import Dashboard from './pages/Dashboard';
 
@@ -40,26 +41,28 @@ function RootRedirect() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Starting at '/' shows Welcome screen for everyone unless already logged in */}
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/welcome" element={<AuthLayout />} />
-          <Route path="/login" element={<AuthLayout />} />
-          <Route path="/signup" element={<AuthLayout />} />
-          <Route path="/forgot-password" element={<AuthLayout />} />
-          <Route path="/reset-password/:token" element={<AuthLayout />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<RootRedirect />} />
-        </Routes>
-      </BrowserRouter>
+      <DialogProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Starting at '/' shows Welcome screen for everyone unless already logged in */}
+            <Route path="/" element={<RootRedirect />} />
+            <Route path="/welcome" element={<AuthLayout />} />
+            <Route path="/login" element={<AuthLayout />} />
+            <Route path="/signup" element={<AuthLayout />} />
+            <Route path="/forgot-password" element={<AuthLayout />} />
+            <Route path="/reset-password/:token" element={<AuthLayout />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<RootRedirect />} />
+          </Routes>
+        </BrowserRouter>
+      </DialogProvider>
     </AuthProvider>
   );
 }

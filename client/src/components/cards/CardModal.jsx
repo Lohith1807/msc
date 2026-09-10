@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { platformAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { useDialog } from '../../context/DialogContext';
 
 const STEP_ROTATIONS = [0, 90, 180, 270];
 
 export default function CardModal({ card, onClose, onResponseSubmitted }) {
   const { user } = useAuth();
+  const { toast } = useDialog();
 
   // Rotation state: cumulative degrees in multiples of 90 (0, 90, 180, 270, 360, ...)
   const [totalAngle, setTotalAngle] = useState(0);
@@ -498,10 +500,12 @@ export default function CardModal({ card, onClose, onResponseSubmitted }) {
       setEvaluationText('');
       setEvalSaved(false);
       setEvalError('');
+      toast.success('Patient reflection recorded successfully!');
       if (onResponseSubmitted) {
         onResponseSubmitted();
       }
     } catch (err) {
+      toast.error(err.message || 'Failed to submit response. Please try again.');
       setErrorMessage(err.message || 'Failed to submit response. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -538,10 +542,12 @@ export default function CardModal({ card, onClose, onResponseSubmitted }) {
         setSubmittedResponse(res.response);
       }
       setEvalSaved(true);
+      toast.success('Evaluation saved successfully!');
       if (onResponseSubmitted) {
         onResponseSubmitted();
       }
     } catch (err) {
+      toast.error(err.message || 'Failed to save evaluation. Please try again.');
       setEvalError(err.message || 'Failed to save evaluation. Please try again.');
     } finally {
       setIsSubmittingEval(false);

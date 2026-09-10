@@ -925,7 +925,7 @@ body::-webkit-scrollbar {
   width: 100%;
   height: 100%;
   border-radius: 26px;
-  padding: 36px 24px 30px;
+  padding: 28px 22px 22px;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -948,6 +948,32 @@ body::-webkit-scrollbar {
   justify-content: center;
   width: 100%;
   margin: 0;
+  padding: 8px 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.carousel-card-image,
+.card-custom-image {
+  max-width: 215px;
+  max-height: 220px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.42));
+  display: block;
+  margin: 0 auto;
+  transition: transform var(--transition-fast);
+  user-select: none;
+  pointer-events: none;
+}
+
+.carousel-card-item:hover .carousel-card-image,
+.carousel-card-item.card-slot-main .carousel-card-image,
+.carousel-card-item:hover .card-custom-image,
+.carousel-card-item.card-slot-main .card-custom-image {
+  transform: scale(1.06);
 }
 
 .card-large-emoji {
@@ -1290,12 +1316,12 @@ body::-webkit-scrollbar {
 }
 
 .gallery-custom-image {
-  width: 54px;
-  height: 54px;
-  max-width: 54px;
-  max-height: 54px;
+  width: 100%;
+  max-width: 130px;
+  max-height: 130px;
   object-fit: contain;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.28));
+  border-radius: 10px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.32));
   display: block;
   margin: 0 auto;
 }
@@ -3626,10 +3652,14 @@ body::-webkit-scrollbar {
 }
 
 .preview-card-image {
-  max-width: 90px;
-  max-height: 90px;
+  width: auto;
+  max-width: 160px;
+  max-height: 180px;
   object-fit: contain;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
+  border-radius: 10px;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
+  display: block;
+  margin: 0 auto;
 }
 
 .preview-card-name {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { platformAPI } from '../../services/api';
+import { useDialog } from '../../context/DialogContext';
 import CustomSelect from '../common/CustomSelect';
 
 const ROTATION_OPTIONS = [
@@ -12,6 +13,7 @@ const ROTATION_OPTIONS = [
 const DEFAULT_CARD_GRADIENT = 'linear-gradient(135deg, #1c3a52 0%, #2a9fb0 100%)';
 
 export default function AdminCardManager({ onCardsUpdated }) {
+  const { confirm, toast } = useDialog();
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -114,25 +116,35 @@ export default function AdminCardManager({ onCardsUpdated }) {
           ],
         });
         setSuccessMessage(`Card "${formData.name}" created successfully!`);
+        toast.success(`Card "${formData.name}" created successfully!`);
       }
       setIsCardModalOpen(false);
       loadCards();
       if (onCardsUpdated) onCardsUpdated();
     } catch (err) {
+      toast.error(err.message || 'Error saving card');
       setErrorMessage(err.message || 'Error saving card');
     }
   };
 
   const handleDeleteCard = async (card) => {
-    if (!window.confirm(`Are you sure you want to permanently delete "${card.name}"?`)) {
+    const isConfirmed = await confirm({
+      title: 'Permanently Delete Card',
+      message: `Are you sure you want to permanently delete "${card.name}"? This action cannot be undone.`,
+      confirmText: 'Delete Card',
+      variant: 'danger',
+    });
+    if (!isConfirmed) {
       return;
     }
     try {
       await platformAPI.deleteCard(card._id || card.id);
+      toast.success(`Card "${card.name}" deleted.`);
       setSuccessMessage(`Card "${card.name}" deleted.`);
       loadCards();
       if (onCardsUpdated) onCardsUpdated();
     } catch (err) {
+      toast.error(err.message || 'Error deleting card');
       setErrorMessage(err.message || 'Error deleting card');
     }
   };
@@ -146,10 +158,12 @@ export default function AdminCardManager({ onCardsUpdated }) {
     );
     try {
       await platformAPI.updateCard(cardId, { status: newStatus });
+      toast.success(`Card marked as ${newStatus}.`);
       setSuccessMessage(`Card marked as ${newStatus}.`);
       loadCards();
       if (onCardsUpdated) onCardsUpdated();
     } catch (err) {
+      toast.error(err.message || 'Error updating status');
       setErrorMessage(err.message || 'Error updating status');
       loadCards();
     }
@@ -206,12 +220,14 @@ export default function AdminCardManager({ onCardsUpdated }) {
           payload
         );
         setSuccessMessage('Question updated successfully!');
+        toast.success('Question updated successfully!');
       } else {
         await platformAPI.addQuestion(
           selectedCardForQuestions._id || selectedCardForQuestions.id,
           payload
         );
         setSuccessMessage('Question mapped to rotation angle successfully!');
+        toast.success('Question mapped to rotation angle successfully!');
       }
 
       setIsQuestionModalOpen(false);
@@ -226,14 +242,22 @@ export default function AdminCardManager({ onCardsUpdated }) {
       }
       if (onCardsUpdated) onCardsUpdated();
     } catch (err) {
+      toast.error(err.message || 'Failed to save question');
       setErrorMessage(err.message || 'Failed to save question');
     }
   };
 
   const handleDeleteQuestion = async (card, qId) => {
-    if (!window.confirm('Delete this mapped question?')) return;
+    const isConfirmed = await confirm({
+      title: 'Delete Mapped Question',
+      message: 'Are you sure you want to delete this mapped question from the card?',
+      confirmText: 'Delete Question',
+      variant: 'danger',
+    });
+    if (!isConfirmed) return;
     try {
       await platformAPI.deleteQuestion(card._id || card.id, qId);
+      toast.success('Question removed from card.');
       setSuccessMessage('Question removed from card.');
       const res = await platformAPI.getCards(true);
       if (res.success) {
@@ -243,6 +267,7 @@ export default function AdminCardManager({ onCardsUpdated }) {
       }
       if (onCardsUpdated) onCardsUpdated();
     } catch (err) {
+      toast.error(err.message || 'Error deleting question');
       setErrorMessage(err.message || 'Error deleting question');
     }
   };

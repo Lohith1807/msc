@@ -216,18 +216,18 @@ export default function CardCarousel({ cards, onSelectCard }) {
                 aria-label={`Card: ${card.name}, ${card.levelBadge || ''}`}
               >
                 <div
-                  className="carousel-card-inner"
+                  className={`carousel-card-inner ${card.imageUrl ? 'has-custom-image' : ''}`}
                   style={{
                     background: card.gradient || 'linear-gradient(145deg, #132b3c 0%, #174256 50%, #1f687a 100%)',
                   }}
                 >
-                  {/* Card Graphic/Image */}
+                  {/* Card Graphic/Image Area */}
                   <div className="card-icon-area">
                     {card.imageUrl ? (
                       <img
                         src={card.imageUrl}
                         alt={card.name}
-                        className="card-custom-image"
+                        className="card-custom-image carousel-card-image"
                         loading="lazy"
                       />
                     ) : (
