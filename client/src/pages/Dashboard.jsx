@@ -284,8 +284,8 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Dev Logs (dev role only) */}
-        {activeView === 'dev-logs' && (role === 'dev' || role === 'admin') && (
+        {/* Dev Logs (dev role ONLY — not admin) */}
+        {activeView === 'dev-logs' && role === 'dev' && (
           <>
             <div className="view-breadcrumb-bar">
               <button
