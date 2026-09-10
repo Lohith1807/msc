@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 // Trust reverse proxy hops (Render, Vercel, Cloudflare, etc.)
 app.set('trust proxy', 1);
 
-// CORS configuration
+// CORS configuration: seamless support for Localhost, Render, and Vercel
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -27,11 +27,19 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (mobile apps, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Allow exact matches from allowedOrigins
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      // Allow all Vercel deployment domains (production & branch previews)
+      if (origin.endsWith('.vercel.app') || origin.includes('vercel.app')) {
         return callback(null, true);
       }
-      return callback(null, true); // Permissive in dev
+
+      // Permissive fallback
+      return callback(null, true);
     },
     credentials: true,
   })
@@ -42,6 +50,25 @@ app.use(express.urlencoded({ extended: true }));
 
 // Apply general API rate limiter
 app.use('/api', apiLimiter);
+
+// Root API status endpoint
+app.get(['/', '/api'], (req, res) => {
+  res.status(200).json({
+    success: true,
+    service: 'MindLab Backend API',
+    status: 'online',
+    timestamp: new Date().toISOString(),
+    frontendUrl: 'http://localhost:5173',
+    endpoints: {
+      health: '/api/health',
+      cards: '/api/cards',
+      stats: '/api/stats',
+      users: '/api/users',
+      logs: '/api/logs',
+      responses: '/api/responses',
+    },
+  });
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

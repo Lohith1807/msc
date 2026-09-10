@@ -26,6 +26,24 @@ const responseSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    patientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    patientName: {
+      type: String,
+      default: '',
+    },
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    doctorName: {
+      type: String,
+      default: '',
+    },
     rotationAngle: {
       type: Number,
       default: 0,
@@ -45,6 +63,28 @@ const responseSchema = new mongoose.Schema(
     answer: {
       type: String,
       required: [true, 'Answer is required'],
+    },
+    evaluationType: {
+      type: String,
+      enum: ['manual', 'ai', 'none'],
+      default: 'none',
+    },
+    evaluation: {
+      type: String,
+      default: '',
+    },
+    evaluatorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    evaluatorName: {
+      type: String,
+      default: '',
+    },
+    evaluatedAt: {
+      type: Date,
+      default: null,
     },
   },
   {

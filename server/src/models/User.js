@@ -41,11 +41,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    age: {
+      type: Number,
+      default: null,
+    },
     bio: {
       type: String,
       default: '',
       maxlength: [300, 'Bio cannot exceed 300 characters'],
     },
+    doctors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     timestamps: true,

@@ -14,8 +14,12 @@ import {
   getStats,
   getResponses,
   submitResponse,
+  evaluateResponse,
   getUsers,
   createUser,
+  createPatient,
+  searchPatients,
+  selectPatient,
   updateUserRole,
   deleteUser,
   getLogs,
@@ -46,8 +50,12 @@ router.delete('/cards/:id/questions/:qId', requireAdmin, deleteQuestion);
 // --- User Responses ---
 router.get('/responses', getResponses);
 router.post('/responses', submitResponse);
+router.put('/responses/:id/evaluation', evaluateResponse);
 
-// --- Users (Admin) ---
+// --- Users & Patients ---
+router.get('/users/patients/search', searchPatients);
+router.post('/users/patient/select', selectPatient);
+router.post('/users/patient', createPatient);
 router.get('/users', getUsers);
 router.post('/users', requireAdmin, createUser);
 router.put('/users/:id/role', requireAdmin, updateUserRole);

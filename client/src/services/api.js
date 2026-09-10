@@ -189,6 +189,12 @@ export const platformAPI = {
       body: responseData,
     }),
 
+  evaluateResponse: (id, evalData) =>
+    request(`/responses/${id}/evaluation`, {
+      method: 'PUT',
+      body: evalData,
+    }),
+
   // Users Directory
   getUsers: (params = {}) => {
     const cleanParams = {};
@@ -205,6 +211,23 @@ export const platformAPI = {
     request('/users', {
       method: 'POST',
       body: userData,
+    }),
+
+  createPatient: (patientData) =>
+    request('/users/patient', {
+      method: 'POST',
+      body: patientData,
+    }),
+
+  searchPatients: (query = '') =>
+    request(`/users/patients/search?q=${encodeURIComponent(query)}`, {
+      method: 'GET',
+    }),
+
+  selectPatient: (patientId) =>
+    request('/users/patient/select', {
+      method: 'POST',
+      body: { patientId },
     }),
 
   updateUserRole: (id, role) =>
