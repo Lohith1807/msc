@@ -366,6 +366,14 @@ export const updateUserRole = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    // Role restriction: Dev accounts are restricted and cannot be modified
+    if (user.role === 'dev') {
+      return res.status(403).json({
+        success: false,
+        message: 'Developer accounts are restricted and their role cannot be changed.',
+      });
+    }
+
     const oldRole = user.role;
     user.role = role;
     await user.save();
@@ -397,10 +405,10 @@ export const deleteUser = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Protect primary seed accounts from deletion
+    // Protect primary seed accounts and dev accounts from deletion
     const protectedEmails = ['lohithreddy1819@gmail.com', 'lohithreddy18april@gmail.com'];
-    if (protectedEmails.includes(user.email)) {
-      return res.status(403).json({ success: false, message: 'Primary seed account cannot be deleted.' });
+    if (protectedEmails.includes(user.email) || user.role === 'dev') {
+      return res.status(403).json({ success: false, message: 'Developer and primary seed accounts cannot be deleted.' });
     }
 
     const userName = user.name;

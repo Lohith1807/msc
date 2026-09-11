@@ -254,6 +254,11 @@ body::-webkit-scrollbar {
   color: #217a8c;
 }
 
+.badge-dev {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
 .chevron-icon {
   color: var(--color-text-muted);
   transition: transform var(--transition-fast);
@@ -4017,6 +4022,27 @@ body::-webkit-scrollbar {
 .role-selector-inline .custom-select-item {
   padding: 6px 8px;
   font-size: 12px;
+}
+
+/* Inline locked dev role badge for role management column */
+.role-locked-dev-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 14px;
+  background: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: default;
+  user-select: none;
+  box-sizing: border-box;
 }
 
 /* Fallback native select styling ensuring no overflow */

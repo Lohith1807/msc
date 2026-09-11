@@ -186,7 +186,7 @@ export default function AdminUsers({ onUsersUpdated }) {
                 { value: 'admin', label: 'Admin' },
                 { value: 'psychiatrist', label: 'Psychiatrist' },
                 { value: 'user', label: 'User' },
-                ...(isDev ? [{ value: 'dev', label: 'Dev' }] : []),
+                { value: 'dev', label: 'Dev' },
               ]}
             />
           </div>
@@ -277,20 +277,29 @@ export default function AdminUsers({ onUsersUpdated }) {
                   {canManageRoles && (
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CustomSelect
-                          className="role-selector-inline"
-                          value={u.role}
-                          onChange={(val) => handleRoleChange(u._id || u.id, val)}
-                          options={[
-                            { value: 'user', label: 'User' },
-                            { value: 'psychiatrist', label: 'Psychiatrist' },
-                            { value: 'admin', label: 'Admin' },
-                            // 'dev' role option only visible to dev users
-                            ...(isDev ? [{ value: 'dev', label: 'Dev' }] : []),
-                          ]}
-                        />
-                        {/* Protect seed accounts from deletion */}
-                        {u.email !== 'lohithreddy1819@gmail.com' && u.email !== 'lohithreddy18april@gmail.com' && (
+                        {u.role === 'dev' ? (
+                          <span
+                            className="role-locked-dev-badge"
+                            title="Developer role is restricted and cannot be modified"
+                          >
+                            DEV
+                          </span>
+                        ) : (
+                          <CustomSelect
+                            className="role-selector-inline"
+                            value={u.role}
+                            onChange={(val) => handleRoleChange(u._id || u.id, val)}
+                            options={[
+                              { value: 'user', label: 'User' },
+                              { value: 'psychiatrist', label: 'Psychiatrist' },
+                              { value: 'admin', label: 'Admin' },
+                              // 'dev' role option only visible to dev users
+                              ...(isDev ? [{ value: 'dev', label: 'Dev' }] : []),
+                            ]}
+                          />
+                        )}
+                        {/* Protect seed accounts and dev accounts from deletion */}
+                        {u.role !== 'dev' && u.email !== 'lohithreddy1819@gmail.com' && u.email !== 'lohithreddy18april@gmail.com' && (
                           <button
                             type="button"
                             className="btn-delete-user"
